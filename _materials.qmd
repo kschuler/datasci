@@ -28,7 +28,7 @@ There are 6 problem sets, due to Gradescope by noon on the following Mondays. Yo
 - [Problem set 3 due ~~Oct 14~~ Oct 21](psets/pset-03.qmd), [solutions](https://colab.research.google.com/drive/1XHjv1ReqSKH8BXzja-N8-XL8OXrFosn-?usp=sharing)
 - [Problem set 4 due ~~Oct 28~~ Nov 4](psets/pset-04.qmd)
 - ~~Problem set 5 due Nov 18~~ (cancelled due to missed week)
-- Problem set 6 due Dec 9 
+- [Problem set 6 due Dec 9](psets/pset-06.qmd) 
 
 <!-- 
     Hi [Professor's Name],
