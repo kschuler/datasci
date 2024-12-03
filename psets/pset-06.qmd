@@ -45,7 +45,7 @@ Suppose you want to add RT as a predictor in your model. Specify (with an equati
 
 ## Problem 6
 
-The stroop data actually includes *repeated measures*, wherein each subject completes multiple trials. Explore the data again and choose a visualization that can incorporate `subj`. Specify (with an equation) and fit a mixed effect logistic regression model predicting accuracy by condition (fixed effect) with a random intercept for `subj`. Make sure to return the parameter estimates.  
+The stroop data actually includes *repeated measures*, wherein each subject completes multiple trials. Explore the data again and choose a visualization that can incorporate `subj`. Specify (with an equation) and fit a mixed effect logistic regression model predicting accuracy by condition and RT (fixed effects) with a random intercept for `subj`. Make sure to return the parameter estimates.  
 
 ## Challenge (optional)
 
