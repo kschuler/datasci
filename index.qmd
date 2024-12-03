@@ -9,8 +9,7 @@ format:
 ---
 
 ::: {.callout-note title="Announcements"}
-- No Wesley lab on THurs Nov 14! Brittany's still on!
-- Exam 2 next Thursday! Nov 21!
+- [Final exam survey!](https://forms.gle/Kq6MbxDmhGpvX5Ww8) 
 :::
 
 Welcome to Data Science for Studying Language & the Mind! The Fall 2024 course information and materials are below. Course materials from previous semesters are archived [here](archive.qmd).
