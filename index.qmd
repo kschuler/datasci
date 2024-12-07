@@ -21,7 +21,7 @@ If you can't make that official time, we can proctor 2 alternatives:
 
 Those with accommodations can request to take the exam with Weingarten any day between Dec 10th and Dec 19th. 
 
-The final is in person, on paper, closed book/note/computer/phone, exactly like exams 1 and 2. The final will cover Sampling Distribution and Hypothesis testing from exam 1, and all of exam 2. 
+The final is in person, on paper, closed book/note/computer/phone, exactly like exams 1 and 2. The final will cover Sampling Distribution and Hypothesis testing from exam 1, and all of exam 2. [Final exam study guide](/notes/exam-final-review.qmd)
 
 
 :::
