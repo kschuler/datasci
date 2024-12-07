@@ -10,6 +10,20 @@ format:
 
 ::: {.callout-note title="Announcements"}
 
+There are 3 options for those wishing to take the final exam: 
+
+- Thursday, December 19, 2024: 12:00pm to 2:00pm in DRLB A8
+
+If you can't make that official time, we can proctor 2 alternatives: 
+
+- Tuesday, December 10 from 12:30pm to 2:30pm in the Linguistics Department 
+- Thursday, December 12 from 12:30pm to 2:30pm in the Linguistics Department
+
+Those with accommodations can request to take the exam with Weingarten any day between Dec 10th and Dec 19th. 
+
+The final is in person, on paper, closed book/note/computer/phone, exactly like exams 1 and 2. The final will cover Sampling Distribution and Hypothesis testing from exam 1, and all of exam 2. 
+
+
 :::
 
 Welcome to Data Science for Studying Language & the Mind! The Fall 2024 course information and materials are below. Course materials from previous semesters are archived [here](archive.qmd).
