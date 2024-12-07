@@ -20,9 +20,9 @@ Studying resources:
 - [Lab 8](/labs/lab-08.qmd)
 - [Lab 9](/labs/lab-09.qmd)
 - [Lab 10](/labs/lab-10.qmd)
-- [Practice exam 1](/exams/exam-01-practice.qmd), [solutions](/exams/exam-01-practice-solutions.pdf)
+- [Practice exam 1](/exams/exam-01-practice.qmd), [solutions](/exams/exam-01-practice-solutions.pdf) - questions 7 and 8 only.
 - [Practice exam 2](/exams/exam-02-practice.qmd), [solutions](/exams/exam-02-practice-solutions.qmd)
-- [Exam 1](/exams/exam-01.qmd), [solutions](/exams/exam-01-solutions.pdf)
+- [Exam 1](/exams/exam-01.qmd), [solutions](/exams/exam-01-solutions.pdf) - questions 7 and 8 only.
 - [Exam 2](/exams/exam-02.qmd), [solutions](/exams/exam-02-solutions.pdf)
 
 
