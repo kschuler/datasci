@@ -13,13 +13,13 @@ format:
 
 Studying resources: 
 
-- [Lab 4 on Sep 19 or 20](/labs/lab-04.qmd)
-- [Lab 5 on Sep 26 or 27](/labs/lab-05.qmd)
-- [Lab 6 on Oct 10 or 11](/labs/lab-06.qmd)
-- [Lab 7 on Oct 17 or 18](/labs/lab-07.qmd)
-- [Lab 8 on Oct 24 or 25](/labs/lab-08.qmd)
-- [Lab 9 on Nov 1 or 2](/labs/lab-09.qmd)
-- [Lab 10 on Nov 14 or 15](/labs/lab-10.qmd)
+- [Lab 4](/labs/lab-04.qmd)
+- [Lab 5](/labs/lab-05.qmd)
+- [Lab 6](/labs/lab-06.qmd)
+- [Lab 7](/labs/lab-07.qmd)
+- [Lab 8](/labs/lab-08.qmd)
+- [Lab 9](/labs/lab-09.qmd)
+- [Lab 10](/labs/lab-10.qmd)
 - [Practice exam 1](/exams/exam-01-practice.qmd), [solutions](/exams/exam-01-practice-solutions.pdf)
 - [Practice exam 2](/exams/exam-02-practice.qmd), [solutions](/exams/exam-02-practice-solutions.qmd)
 - [Exam 1](/exams/exam-01.qmd), [solutions](/exams/exam-01-solutions.pdf)
