@@ -1,0 +1,829 @@
+---
+title:  "Final Exam"
+subtitle: "Data Science for Studying Language & the Mind"
+# author: 
+#     name: Katie Schuler
+#     affiliation: University of Pennsylvania
+number-sections: false
+format: 
+  pdf: default
+
+---
+
+**Instructions**
+
+The exam is worth **138 points**. You have **2 hours** to complete the exam. 
+
+- The exam is closed book/note/computer/phone except for the provided reference sheets
+- If you need to use the restroom, leave your exam and phone with the TAs
+- If you finish early, you may turn in your exam and leave early
+
+<!-- For all multiple choice questions, **only one choice is correct**: 
+
+- [ ] Choose this option
+- [ ] Or this option, but not both! -->
+
+```{r}
+#| echo: false
+#| message: false
+library(tidyverse)
+library(infer)
+library(optimg)
+library(tidymodels)
+theme_set(theme_bw(base_size = 15))
+set.seed(123)
+```
+
+\newcommand\answerbox{%%
+    \framebox(400,50){}}
+
+\newcommand\shorteranswerbox{%%
+    \framebox(400,20){}}
+
+\newcommand\biggeranswerbox{%%
+    \framebox(400,100){}}
+
+
+
+**(5 points) Preliminary questions**
+
+Please complete these questions *before* the exam begins. 
+
+(a) **(1 point)** What is your full name? 
+
+    \shorteranswerbox
+
+(b) **(1 point)** What is your penn ID number? 
+
+    \shorteranswerbox
+
+(c) **(1 point)** What is your lab section TA's name? 
+
+    \shorteranswerbox
+
+(d) **(1 point)** What is today's date? 
+
+    \shorteranswerbox
+
+(e) **(1 point)** Sign your name to agree you will not discuss this exam with anyone until December 19th at 2:00pm EST.
+
+    \shorteranswerbox
+
+\clearpage
+
+
+
+
+### 1. (16 points) Sampling distribution
+
+In natural language, words follow a Zipfian distribution, where a few words are highly frequent and many words are rare. Figure A shows a histogram of this distribution. 
+
+```{r}
+#| echo: false
+#| layout-ncol: 2
+
+zipf_data <- tibble(
+    words = paste("word", 1:100, sep = "_"),
+    rank = 1:100,
+    frequency = round(1000/rank)
+)
+
+zipf_data_ds <- zipf_data %>%
+    summarise(n = n(), mean = mean(frequency), median = median(frequency))
+
+
+ggplot(zipf_data, aes(x = frequency)) +
+    geom_histogram(bins = 15, fill = "lightgray", color = "black") + 
+    labs(tag = "A")
+
+
+
+```
+
+
+(a) **(2 points)** Which descriptive statistic should we use to summarize the central tendency of these data? 
+
+    \shorteranswerbox
+
+(b) **(2 points)** Which descriptive statistic should we use to summarize the spread of these data? 
+
+    \shorteranswerbox 
+
+(c) **(2 points)** Suppose we run the code `rnorm(1000, mean=5, sd=1)`. Which figure below shows the histogram of the resulting data. 
+
+    ```{r}
+    #| echo: false
+    #| layout-ncol: 2
+
+    pdf <- tibble(
+        b = rnorm(1000, mean=5, sd=1),
+        c = rnorm(1000, mean=0, sd = 5)
+    )
+
+
+
+    ggplot(pdf, aes(x = b)) +
+        geom_histogram(bins = 15, fill = "lightgray", color = "black") + 
+        labs(tag = "B", x = "", y = "")
+
+    ggplot(pdf, aes(x = c)) +
+        geom_histogram(bins = 15, fill = "lightgray", color = "black") + 
+        labs(tag = "C", x = "", y = "")
+
+
+
+    ```
+
+    - [ ] Figure B 
+    - [ ] Figure C 
+    - [ ] Not enough information to determine this
+
+\clearpage
+
+(d) **(2 points)** True or false, the probability density function that generated the data in figures B *and* C is given by the equation: $p(x) = \frac{1}{\sigma\sqrt{2\pi}}\exp\left(-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^{2}\right)$
+
+    - [ ] True
+    - [ ] False
+
+(e) **(6 points)** Given the following code, explain what happens in each step:  
+
+    ```{r}
+    #| eval: false
+    library(infer)
+    boot_dist <- data %>%
+        specify(response =  frequency) %>%
+        generate(reps = 1000, type = "bootstrap") %>%
+        calculate(stat = "mean")
+
+    ```
+
+    (i) Explain `specify(response = frequency)`
+
+        \answerbox
+
+    (ii) Explain `generate(reps = 1000, type = "bootstrap")`
+
+            \answerbox
+
+    (iii) Explain `calculate(stat = "mean")`
+
+            \answerbox
+
+
+(e) **(2 points)** True or false, bootstrapping the sampling distribution requires that the data are approximately normally distributed.
+
+    - [ ] True
+    - [ ] False
+
+### 2. (12 points) Hypothesis testing
+
+Suppose a teacher wanted to compare test scores of students in two different sections of a class (Group A and Group B). They visualized the difference in mean test scores betwen groups with a boxplot (figure D). And then used `infer` to construct the null distribution for the difference in means. They used `visualize()` and `shade_p_value()` to visualize the data (figure E). 
+
+```{r}
+#| echo: false
+#| layout-ncol: 2
+
+# Define parameters
+n_per_group <- 100
+mean_value <- 50
+std_dev <- 10
+
+# Create the dataset
+data <- tibble(
+  group = rep(c("A", "B"), each = n_per_group),
+  score = c(
+    rnorm(n_per_group, mean = mean_value, sd = std_dev),
+    rnorm(n_per_group, mean = mean_value, sd = std_dev)
+  )
+) 
+
+ggplot(data, aes(y = score, x = group)) + 
+    geom_boxplot()  + labs(tag = "D")
+
+# observ
+obs <- data %>% 
+  specify(response = score, explanatory = group) %>%
+  calculate(stat = "diff in means", order = c("A", "B")) 
+# generate the null distribution 
+null_distribution <- data %>% 
+  specify(response = score, explanatory = group) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("A", "B")) 
+
+p <- null_distribution  %>%
+    get_p_value(obs, direction = "both")
+
+null_distribution %>% 
+  visualize() + shade_p_value(obs_stat = obs, direction = "two-sided") + theme_bw() + labs(tag = "I") + 
+  labs(tag = "E")
+
+```
+
+(a) **(3 points)**What is the null hypothesis? 
+
+    \biggeranswerbox 
+
+(b) **(2 points)**If the null hypothesis is true, how likely is our observed pattern of results? 
+
+    - [ ] $p = 0.908$
+    - [ ] $p = 0.012$
+    - [ ] $p = 192$
+    - [ ] $p < 0.05$ 
+    - [ ] Not enough information to determine this
+
+(c) **(2 points)**True or false, we should reject the null hypothesis. 
+
+    - [ ] True
+    - [ ] False
+
+\clearpage
+
+(d) **(3 points)** Explain why you chose True or False for question (c) above. 
+
+    \biggeranswerbox 
+
+(e) **(2 points)** Why do we pose a null hypothesis? Choose one.
+
+    - [ ] It is the hypothesis most likely to be true.
+    - [ ] It allows us to generate predictions based on prior beliefs.
+    - [ ] It is the hypothesis for which we can simulate data.
+    - [ ] It ensures that the alternative hypothesis is proven false. 
+
+
+\clearpage 
+
+### 3. (24 points) Modeling true or false {.unnumbered}
+
+(a) **(2 points)** The goal of a regression model is to classify observations into distinct categories. 
+
+    - [ ] True
+    - [ ] False
+
+(b) **(2 points)** Model specification involves finding the best fitting free parameters.
+
+    - [ ] True
+    - [ ] False
+
+(c) **(2 points)** The equation $y = \beta_0 \cdot 1 + \beta_1 \cdot x + \beta_2 \cdot x_2$ expresses $y$ as a weighted sum of inputs. 
+
+    - [ ] True
+    - [ ] False
+
+(d) **(2 points)** Regression and classification are both considered to be unsupervised learning problems. 
+
+    - [ ] True
+    - [ ] False  
+
+(e) **(2 points)** In gradient descent, we use linear algebra to find the closed form solution to the parameter estimates.
+
+    - [ ] True
+    - [ ] False
+
+(f) **(2 points)** The ordinary least squares solution could arrive at a local minimum and miss the true global minimum.
+
+    - [ ] True
+    - [ ] False
+
+(g) **(2 points)** The highest possible $R^2$ value is 1 (100%).
+
+    - [ ] True
+    - [ ] False
+
+(h) **(2 points)** The lowest possible $R^2$ value is 0 (0%). 
+
+    - [ ] True
+    - [ ] False
+
+(i) **(2 points)** An overfit model performs poorly on the sample, but well when predicting new values. 
+
+    - [ ] True
+    - [ ] False
+
+
+(j) **(2 points)** The error bars on our parameter estimates will become smaller as we increase our sample size. 
+
+    - [ ] True
+    - [ ] False
+
+(k) **(2 points)** Nearest-neighbor regression can be used for classification problems.
+
+    - [ ] True
+    - [ ] False
+
+(l) **(2 points)** The output of the logistic function is bounded by -1 and 1. 
+
+    - [ ] True
+    - [ ] False
+
+\clearpage 
+
+### 4. (15 points) Model specification
+
+Suppose we measure the reaction times (in milliseconds) of both native and non-native speakers as they process words of varying frequency in English (measured as occurrences per million words). We store these data in a tibble called `rt_by_speaker`. The first 6 rows of this tibble are printed below for your reference. 
+
+```{r}
+#| echo: false
+#| message: false
+
+rt_by_speaker <- read_csv('../assests/csv/reaction-time-by-speaker.csv')
+
+head(rt_by_speaker)
+
+```
+
+Suppose we specify the following model with `lm`: 
+
+```{r}
+model <- lm(ReactionTime ~ 1 + WordFrequency * SpeakerType, data = rt_by_speaker)
+summary(model)
+```
+
+
+(a) **(3 points)** For each of the following, circle the option that best describes the type of model we fit. 
+
+    (i) **(1 point)** Supervised or unsupervised 
+    (ii) **(1 point)** Regression or classification 
+    (iii) **(1 point)** Linear or linearlizable nonlinear 
+
+(b) **(3 points)** Write the model's specification as a mathematical expression: 
+
+    \biggeranswerbox
+
+(c) **(3 points)** What is the model's predicted reaction time for a Non-Native speaker with a word frequency of 1? Write your answer as an unsimplified expression (eg. 2 + 3 * 5, not 17):
+
+    \biggeranswerbox
+
+(d) **(3 points)** What is the model's predicted reaction time for a Native speaker with a word frequency of 0? Write your answer as an unsimplified expression (eg. 2 + 3 * 5, not 17):
+
+    \biggeranswerbox
+
+\clearpage
+
+(e) **(3 points)** Circle the figure that is most likely to be the plot of the model specified to `lm`? Choose one.
+
+```{r}
+#| echo: false
+#| message: false
+#| layout-ncol: 2
+#| layout-nrow: 2
+
+foil1 <- lm(ReactionTime ~ 1 + I(WordFrequency^2) + SpeakerType, data = rt_by_speaker)
+foil2 <- lm(ReactionTime ~ 1 + I(WordFrequency^2), data = rt_by_speaker)
+foil3 <- lm(ReactionTime ~ 1 + WordFrequency + SpeakerType, data = rt_by_speaker)
+
+rt_by_speaker <- rt_by_speaker %>%
+    mutate(a = predict(model, rt_by_speaker)) %>%
+    mutate(b = predict(foil1, rt_by_speaker)) %>%
+    mutate(c = predict(foil2, rt_by_speaker)) %>%
+    mutate(d = predict(foil3, rt_by_speaker))
+
+
+
+rt_by_speaker %>%
+ggplot(aes(x = WordFrequency, y = ReactionTime, shape = SpeakerType)) + 
+    geom_point(alpha = 0.5)  +
+    geom_line(aes(y = a)) +
+    labs(tag = "A")
+
+rt_by_speaker %>%
+ggplot(aes(x = WordFrequency, y = ReactionTime, shape = SpeakerType)) + 
+    geom_point(alpha = 0.5)  +
+    geom_line(aes(y = b)) +
+    labs(tag = "B")
+
+rt_by_speaker %>%
+ggplot(aes(x = WordFrequency, y = ReactionTime, shape = SpeakerType)) + 
+    geom_point(alpha = 0.5)  +
+    geom_line(aes(y = c)) +
+    labs(tag = "B")
+
+rt_by_speaker %>%
+ggplot(aes(x = WordFrequency, y = ReactionTime, shape = SpeakerType)) + 
+    geom_point(alpha = 0.5)  +
+    geom_line(aes(y = d)) +
+    labs(tag = "D")
+
+```
+
+
+
+
+\clearpage
+
+### 5. (12 points) Applied model specification
+
+Suppose we encounter the following dataset, plotted here. 
+
+
+```{r}
+#| echo: false
+#| layout-ncol: 2
+
+# Load necessary libraries
+library(tibble)
+library(ggplot2)
+
+# Generate x values
+x <- seq(-10, 10, length.out = 200)
+
+# Generate y values based on a quadratic equation with some random noise
+a <- 1  # Coefficient for x^2
+b <- -2 # Coefficient for x
+c <- 3  # Constant term
+noise <- rnorm(length(x), mean = 0, sd = 10)  # Random noise
+y <- a * x^2 + b * x + c + noise
+
+# Create the dataset
+poly_data <- tibble(x = x, y = y)
+
+
+# Plot the data
+ggplot(poly_data, aes(x = x, y = y)) +
+  geom_point(alpha = 0.6)  +
+  stat_function(fun = function(x) a * x^2 + b * x + c ) 
+ 
+
+
+
+```
+
+We specify and fit these data with `lm`, which gives the following summary: 
+
+```{r}
+#| echo: false
+model <- lm(y ~ x + I(x^2) , data = poly_data)
+summary(model)
+```
+
+\clearpage 
+
+(a) **(2 points)** What type of polynomial is included in the model specification? 
+
+- [ ] Constant
+- [ ] Linear 
+- [ ] Quadratic 
+- [ ] Cubic 
+- [ ] Quartic 
+
+
+(b) **(3 points)** Write the *fitted model* as a mathematical expression: 
+
+    \biggeranswerbox 
+
+(c) **(2 points)** In class we learned about two ways to linearize a nonlinear model. Which option best describes what we have done here? 
+
+    - [ ] Expanding the input space by adding new terms
+    - [ ] Transforming an existing term
+
+(d) **(2 points)** Given the predicted model (shown with the black line on the figure), what does the model predict for the value of $y$ when $x=-7.5$ (approximate is fine)? 
+
+    \shorteranswerbox 
+
+(e) **(3 points)** Suppose we fit the model specification `y ~ 1`. Explain why this would be an overfit or underfit model.
+
+    \biggeranswerbox
+
+
+\clearpage
+
+### 6. (15 points) Model fitting
+
+Suppose we fit the polynomial model from section 5 with iterative optimization via `optimg`: 
+
+```{r}
+#| echo: false
+
+SSE <- function(data, par) {
+  data %>%
+    mutate(prediction = par[1] + par[2]* x + par[3]*I(x^2)) %>%
+    mutate(error = prediction - y) %>%
+    mutate(squared_error = error^2) %>%
+    with(sum(squared_error))
+}
+
+
+
+```
+
+
+```{r}
+
+optimg(data =poly_data, par = c(1,1,1), fn=SSE, method = "STGD")
+```
+
+
+
+(a) **(2 points)** Which of the following best describes what `optimg` and `lm` return? 
+
+    - [ ] *nearly* the same parameter estimates
+    - [ ] identical parameter estimates 
+    - [ ] completely different parameter estimates 
+    - [ ] depends on whether one finds a local minimum
+    - [ ] not enough information to determine this 
+
+(b) **(2 points)** What is the cost function used by `optimg`? Choose one.
+
+    - [ ] Sum of squared error
+    - [ ] STGD 
+    - [ ] standard error 
+    - [ ] standard deviation
+    - [ ] Not enough information to determine this
+
+(c) **(2 points)** How many steps did our iterative optimization algorithm take? 
+
+    \shorteranswerbox 
+
+(d) **(2 points)** What was the value of the cost function for the optimal parameters according to `optimg`?
+
+    -\shorteranswerbox
+
+(e) **(2 points)** What parameters did `optimg` initialize at? 
+
+    - [ ] `c(0, 0, 0)`
+    - [ ] `c(1, 1, 1)`
+    - [ ] `c(2.850417, -1.957891, 1.024866)`
+    - [ ] Not enough information to determine this
+
+(e) **(2 points)** Which approach does `optimg` use to estimate the free parameters? Choose one.
+
+    - [ ] Ordinary least-squares solution (OLS)
+    - [ ] Gradient descent 
+    - [ ] Either Gradient descent or OLS
+    - [ ] None of the above
+
+(f)  **(3 points)** Given the model specified in the code to `lm`, fill in the missing values for the first 6 rows of the output vector $\mathbf{y}$ and the input matrix $\mathbf{X}$. 
+
+$$
+\begin{aligned}
+    \begin{bmatrix}
+    \rule{1.5cm}{0.3mm}  \\
+    \rule{1.5cm}{0.3mm}  \\
+    \rule{1.5cm}{0.3mm}  \\
+    \rule{1.5cm}{0.3mm}  \\
+    \rule{1.5cm}{0.3mm} \\
+    \rule{1.5cm}{0.3mm}  
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    1 &  \rule{1.5cm}{0.3mm} & 100 \\
+    1 & \rule{1.5cm}{0.3mm} & 98.0 \\
+    1 & \rule{1.5cm}{0.3mm} & 96.0 \\
+    1 & \rule{1.5cm}{0.3mm} & 94.1 \\
+    1 & \rule{1.5cm}{0.3mm} & 92.1\\
+    1 & \rule{1.5cm}{0.3mm} & 90.2
+    \end{bmatrix}
+    \begin{bmatrix}
+    w_1 \\
+    w_2 \\
+    w_3
+    \end{bmatrix}
+    +
+    \begin{bmatrix}
+        \epsilon_1 \\
+        \epsilon_2 \\
+        \epsilon_3 \\
+        \epsilon_4 \\
+        \epsilon_5 \\
+        \epsilon_6
+    \end{bmatrix}
+\end{aligned}
+$$
+
+We've printed the top 6 rows of the `poly_data` tibble for your reference here: 
+```{r}
+#| echo: false
+poly_data %>% head() 
+```
+
+\clearpage
+
+### 7. (15 points) Model accuracy 
+
+Suppose we want to determine how accurate our polynomial model is from section 5. We return `summary(model)` again here for your reference. 
+
+
+```{r}
+#| echo: false
+
+summary(model)
+```
+
+
+Then we perform cross-validation and return the validation metrics with `collect_metrics()`
+
+```{r}
+#| echo: false
+
+splits <- vfold_cv(poly_data)
+
+model_spec <- linear_reg() %>%  
+set_engine(engine = "lm")  
+
+our_workflow <- workflow() %>%
+add_model(model_spec) %>%  
+add_formula(y ~ x + I(x^2)) 
+
+fitted_models <- 
+fit_resamples(
+    object = our_workflow, 
+    resamples = splits) 
+
+fitted_models %>%
+    collect_metrics()
+```
+
+\clearpage 
+
+
+(a) **(6 points)** Fill in the blanks in the following code to perform the cross validation on the polynomial model. 
+
+    ```{r}
+    #| echo: true
+    #| eval: false
+
+    splits <- vfold_cv(poly_data)
+    model_spec <- _____a_____ %>%  set_engine(engine = "lm")  
+    our_workflow <- workflow() %>% add_model(model_spec) %>%  add_formula(_____b_____) 
+    fitted_models <- fit_resamples(object = our_workflow, resamples = ____c____) 
+    fitted_models %>% collect_metrics()
+    ```
+
+
+    (i) Blank a (choose one): 
+        
+        - [ ] `logistic_reg()`
+        - [ ] `linear_reg()`
+        - [ ] `poly_reg()`
+        - [ ] `lm()`
+
+    (ii) Blank b (fill in the blank)
+        
+            \shorteranswerbox 
+
+    
+    (iii) Blank c (choose one): 
+
+            - [ ] `"lm"`
+            - [ ] `splits`
+            - [ ] `our_workflow`
+            - [ ] `model_spec` 
+
+
+(b) **(2 points)** $R^2$ for the population was _______ than $R^2$ for the sample. Choose one.  
+
+    - [ ] higher
+    - [ ] lower 
+    - [ ] exactly the same 
+    - [ ] not enough information to determine this 
+
+
+(c) **(2 points)** What kind of cross-validation did we perform? Choose one.
+
+    - [ ] k-fold 
+    - [ ] boostrapping 
+    - [ ] leave-one out
+    - [ ] Not enough information to determine this
+
+(d) **(2 points)** How many splits of our data does our code generate? 
+
+    \shorteranswerbox
+
+(e) **(3 points)** Explain why one would prefer cross-validation over simply relying on the $R^2$ value returned by `lm`.
+
+    \biggeranswerbox
+
+\clearpage 
+
+### 8. (12 points) Model reliability 
+
+Suppose we plot and fit two models:  `y ~ 1`and `y ~ x + I(x^2)`.
+
+
+```{r}
+#| echo: false
+#| message: false
+
+
+model_2 <- lm(y ~ 1, data = poly_data)
+summary(model_2)
+
+
+
+    
+
+```
+
+
+```{r} 
+#| echo: false
+
+model_4 <- lm(y ~ x + I(x^2), data = poly_data)
+summary(model_4)
+```
+
+\clearpage
+
+(a) **(2 points)** Which model is more accurate? Choose one.
+
+    - [ ] `y ~ 1`
+    - [ ] `y ~ x + I(x^2)`
+    - [ ] Both models are equally accurate
+    - [ ] Not enough information to determine this
+
+(b) **(3 points)** Should we always choose the model with the highest accuracy? Explain why or why not. 
+
+    \biggeranswerbox
+
+(c) **(2 points)** Which value in the model summary quantifies the model's reliability? 
+
+    - [ ] Multiple R-squared 
+    - [ ] Adjusted R-squared
+    - [ ] Estimate 
+    - [ ] Std. Error 
+    - [ ] Pr(>|t|)
+
+    
+(d) **(3 points)** Suppose we bootstrap a 68% confidence interval for our parameter estimates for `y ~ x + I(x^2)` model. What would happen if we collected a lot more data?  Choose one.
+
+    - [ ] It would get smaller (narrower)
+    - [ ] It would get bigger (wider) 
+    - [ ] It would stay the same
+    - [ ] An error. We cannot bootstrap polynomial models no matter how much data we have or do not have.
+        
+
+(e) **(2 points)** Rather than adding more participants to our existing sample, suppose we decided to repeat our experiment with an entirely new sample of participants. True or false, fitting the same model to these new data would yield approximately the same parameter estimates? 
+
+    - [ ] True
+    - [ ] False
+
+
+### 9. (12 points) Classification 
+
+(a) **(2 points)** Which of the following fits a logistic regression model in R? Choose all that apply.  
+
+    ```{r}
+    #| echo: true
+    #| eval: false
+
+    # code A
+    glm(y ~ x, data = data, family = "binomial")
+
+    # code B
+    data %>%
+        specify(y ~ x) %>%
+        fit() 
+
+    # code C 
+    logistic_reg %>%
+        set_engine("glm") %>%
+        fit(y ~ x, data = data)
+
+
+    ```
+
+    - [ ] code A 
+    - [ ] code B
+    - [ ] code C
+    - [ ] not enough information to determine this
+    
+(b) **(2 points)** What is the link function for logistic regression? 
+
+    - [ ] logistic function 
+    - [ ] polynomial expansion
+    - [ ] log transformation 
+    - [ ] inverse trasformation 
+    - [ ] linear classifyer 
+
+
+(c) **(2 points)** Which of the following parsnip specifications could specify and fit a classification model? Choose all that apply.
+
+    - [ ] `linear_reg() %>% set_engine("lm")`
+    - [ ] `logistic_reg() %>% set_engine("glm")`
+    - [ ] `linear_reg() %>% set_engine("classification")`
+    - [ ] `logistic_reg() %>% set_engine("lm")`
+
+\clearpage
+
+(d) **(2 points)** Which of the following expresses the link function for the `glm` we fit? 
+
+    - [ ] $f(a) = \frac{1}{1 + e^{-a}}$
+    - [ ] $\sum_{i=i}^{n} (d_{i} - m_{i})^2$ 
+    - [ ] $y=\sum_{i=1}^{n}w_ix_i$
+    - [ ] $R^2=100\times(1-\frac{SSE_{model}}{SSE_{reference}})$
+
+(e) **(2 points)** What is the difference between regression and classification? 
+
+    - [ ] Regression predicts a continuous output, classification discrete 
+    - [ ] Classification predicts a continuous output, regression discrete. 
+    - [ ] Regression is a supervised learning problem and classification is unsupervised 
+    - [ ] Regression is linear and classification is nonlinear
+
+(f) **(2 points)** What accuracy metric is best applied to classification models? 
+
+    - [ ] $R^2$ 
+    - [ ] RMSE - root mean squared error
+    - [ ] Percent correct 
+    - [ ] Adjusted $R^2$ 
+
+    
